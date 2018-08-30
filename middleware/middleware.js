@@ -1,8 +1,8 @@
 const jwt = require('jsonwebtoken');
+const routes = require("../routes");
 
-module.exports = (app, express) => {
+module.exports = app => {
   const bodyParser = require('body-parser');
-  const user = require('../routes/user.route');
 
   app.use(bodyParser.urlencoded({ extended: true }));
   app.use(bodyParser.json());
@@ -13,7 +13,7 @@ module.exports = (app, express) => {
     next();
   });
   app.use(verifyUser);
-  app.use('/user', user);
+  app.use(routes.userRoutes);
 };
 
 verifyUser = (req, res, next) => {

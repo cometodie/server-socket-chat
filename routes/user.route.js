@@ -5,6 +5,10 @@ const bcrypt = require('bcrypt');
 const User = require('../models/user.model');
 const jwt = require('jsonwebtoken');
 
+router.get('/test', function(req, res) {
+  res.send('test1111111')
+})
+
 router.get('/update-token', function(req, res) {
   User.findOne({ email: jwt.decode(req.query.token).email })
     .exec()
@@ -89,7 +93,7 @@ router.post('/signin', function(req, res) {
             }
           );
           user.token = JWTToken;
-          User.update({ _id: user._id }, { user }, (err, status) => {
+          User.findByIdAndUpdate(user._id, user, (err, status) => {
             return res.status(200).json({
               token: JWTToken
             });
