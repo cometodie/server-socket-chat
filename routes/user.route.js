@@ -5,14 +5,10 @@ const bcrypt = require('bcrypt');
 const User = require('../models/user.model');
 const jwt = require('jsonwebtoken');
 
-router.get('/test', function(req, res) {
-  res.send('test1111111')
-})
-
-router.get('/update-token', function(req, res) {
+router.get('/update-token', function (req, res) {
   User.findOne({ email: jwt.decode(req.query.token).email })
     .exec()
-    .then(function(user) {
+    .then(function (user) {
       if (user) {
         const JWTToken = jwt.sign(
           {
@@ -42,22 +38,30 @@ router.get('/update-token', function(req, res) {
       });
     });
 });
-router.post('/signup', function(req, res) {
-  bcrypt.hash(req.body.password, 10, function(err, hash) {
+router.post('/signup', function (req, res) {
+  bcrypt.hash(req.body.password, 10, function (err, hash) {
     if (err) {
       return res.status(500).json({
         error: err
       });
     } else {
+      const {
+        email,
+        fname,
+        lname,
+        login,
+      } = req.body
       const user = new User({
         _id: new mongoose.Types.ObjectId(),
-        email: req.body.email,
+        email,
+        fname,
+        lname,
+        login,
         password: hash
       });
       user
         .save()
-        .then(function(result) {
-          console.log(result);
+        .then(function (result) {
           res.status(200).json({
             success: 'New user has been created'
           });
@@ -71,11 +75,11 @@ router.post('/signup', function(req, res) {
   });
 });
 
-router.post('/signin', function(req, res) {
+router.post('/signin', function (req, res) {
   User.findOne({ email: req.body.email })
     .exec()
-    .then(function(user) {
-      bcrypt.compare(req.body.password, user.password, function(err, result) {
+    .then(function (user) {
+      bcrypt.compare(req.body.password, user.password, function (err, result) {
         if (err) {
           return res.status(401).json({
             failed: 'Unauthorized Access'
@@ -89,12 +93,13 @@ router.post('/signin', function(req, res) {
             },
             'secret',
             {
-              expiresIn: '20s'
+              expiresIn: '20000s'
             }
           );
           user.token = JWTToken;
           User.findByIdAndUpdate(user._id, user, (err, status) => {
             return res.status(200).json({
+              ...user._doc,
               token: JWTToken
             });
           });

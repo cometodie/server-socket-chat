@@ -13,21 +13,26 @@ module.exports = app => {
     next();
   });
   app.use(verifyUser);
-  app.use(routes.userRoutes);
+  app.use('/users/', routes.userRoutes);
+  app.use('/api/', routes.postRoutes);
+  app.use('/api/', routes.chatRoutes);
 };
 
 verifyUser = (req, res, next) => {
-  if (req.path !== '/user/signin' || req.path !== '/user/signup') {
+  if (req.path === '/users/signin' || req.path === '/users/signup') {
     return next();
   } else {
-    const token = req.headers.authorization.split(' ')[1];
-    console.log(jwt.decode(token));
-    jwt.verify(token, 'secret', err => {
-      if (err) {
-        res.send(401);
-      } else {
-        return next();
-      }
-    });
+    try {
+      const token = req.headers.authorization.split(' ')[1];
+      jwt.verify(token, 'secret', err => {
+        if (err) {
+          res.sendStatus(401);
+        } else {
+          return next();
+        }
+      });
+    } catch (error) {
+      res.sendStatus(401);
+    }
   }
 };
